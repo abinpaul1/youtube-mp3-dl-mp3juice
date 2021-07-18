@@ -1,0 +1,33 @@
+version: "3"
+services:
+  frontend:
+    container_name: frontend
+    build:
+        context: ./frontend_react_app
+        dockerfile: Dockerfile.prod
+    ports:
+        - 3000:80
+    volumes: 
+        - ./frontend_react_app:/usr/src/app
+        - node_modules:/usr/src/app/node_modules
+    depends_on:
+      - backend
+    
+
+  backend:
+    restart: always
+    container_name: backend
+    build: 
+        context: ./backend_flask_server
+        dockerfile: Dockerfile.dev
+    ports:
+      - 8080:8080
+    volumes:
+      - ./backend_flask_server:/usr/src/app
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=app.py
+      - FLASK_DEBUG=1
+
+volumes:
+  node_modules:  
