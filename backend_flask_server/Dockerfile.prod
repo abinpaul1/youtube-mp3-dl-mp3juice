@@ -1,0 +1,16 @@
+FROM python:3.8.11-slim-buster
+
+RUN apt-get update; \
+	apt-get install -y --no-install-recommends \
+		ffmpeg
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+COPY requirements.txt /usr/src/app
+RUN pip install -r requirements.txt
+
+RUN pip install gunicorn[gevent]
+
+EXPOSE 8080
+CMD gunicorn --worker-class gevent --workers 8 --bind 0.0.0.0:8080 wsgi:app --max-requests 10000 --timeout 0 --keep-alive 5 --log-level info
