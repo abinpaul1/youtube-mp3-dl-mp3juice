@@ -14,4 +14,4 @@ RUN pip install gunicorn==20.0.4
 EXPOSE 8080
 
 CMD ["/bin/bash"]
-ENTRYPOINT gunicorn --chdir /usr/src/app app:app -w 2 --threads 2 -b 0.0.0.0:8080
+ENTRYPOINT gunicorn --chdir /usr/src/app app:app -t 0 -w 10 --threads 10 -b 0.0.0.0:8080

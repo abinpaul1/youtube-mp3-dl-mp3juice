@@ -116,4 +116,4 @@ def download_as_audio():
     return send_file(audio_file_path, as_attachment=True, download_name=video_title+".mp3")
 
 if __name__ == '__main__':
-    app.run(host=SERVER_HOST, port=SERVER_PORT, debug=True)
+    app.run(host=SERVER_HOST, port=SERVER_PORT, threaded=True)
