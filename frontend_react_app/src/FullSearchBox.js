@@ -110,7 +110,7 @@ export default class FullSearchBox extends React.PureComponent{
         return (
             <>
             <Container>
-              <img src={logo} alt="Mp3juice.cc logo"/>
+              <img width="300px"src={logo} alt="Mp3juice.cc logo"/>
             </Container>
             <Container>
                 <SearchBox
