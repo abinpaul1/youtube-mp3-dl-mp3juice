@@ -19,7 +19,7 @@ services:
     container_name: backend
     build: 
         context: ./backend_flask_server
-        dockerfile: Dockerfile.dev
+        dockerfile: Dockerfile.prod
     ports:
       - 8080:8080
     volumes:

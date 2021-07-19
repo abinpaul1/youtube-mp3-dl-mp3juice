@@ -10,7 +10,8 @@ WORKDIR /usr/src/app
 COPY requirements.txt /usr/src/app
 RUN pip install -r requirements.txt
 
-RUN pip install gunicorn[gevent]
-
+RUN pip install gunicorn==20.0.4
 EXPOSE 8080
-CMD gunicorn --worker-class gevent --workers 8 --bind 0.0.0.0:8080 wsgi:app --max-requests 10000 --timeout 0 --keep-alive 5 --log-level info
+
+CMD ["/bin/bash"]
+ENTRYPOINT gunicorn --chdir /usr/src/app app:app -w 2 --threads 2 -b 0.0.0.0:8080
