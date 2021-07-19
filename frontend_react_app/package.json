@@ -7,6 +7,7 @@
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
     "bootstrap": "^5.0.2",
+    "npm": "^7.20.0",
     "proptypes": "^1.1.0",
     "react": "^17.0.2",
     "react-bootstrap": "^1.6.1",
