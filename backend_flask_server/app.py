@@ -27,13 +27,13 @@ SERVER_PORT = 8080
 video_cache_config = {
     "CACHE_TYPE": "FileSystemCache",  # Flask-Caching related configs
     "CACHE_DIR": "./cache/vid_cache_tmp",
-    "CACHE_DEFAULT_TIMEOUT": 10*60 # Cache cleared every 10 min
+    "CACHE_DEFAULT_TIMEOUT": 4*60*60 # Cache cleared every 4 hours
 }
 
 processing_queue_cache_config = {
     "CACHE_TYPE": "FileSystemCache",  # Flask-Caching related configs
     "CACHE_DIR": "./cache/proc_q_cache_tmp",
-    "CACHE_DEFAULT_TIMEOUT": 10*60 # Cache cleared every 10 min
+    "CACHE_DEFAULT_TIMEOUT": 4*60*60 # Cache cleared every 4 hours
 }
 
 video_cache = Cache(config=video_cache_config)
