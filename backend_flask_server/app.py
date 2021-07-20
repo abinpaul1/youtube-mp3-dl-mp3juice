@@ -2,16 +2,19 @@ from time import sleep
 from flask import Flask, request, send_file, jsonify
 import youtube_dl
 from random import random
+import shutil
+import os
 
 from youtubesearchpython import VideosSearch
 from flask_cors import CORS
 from flask_caching import Cache
 
-
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, APIC, error
 
 import requests
+
+from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
 CORS(app, resources={r'/youtube-dl/*': {"origins": "*"}})
@@ -19,20 +22,18 @@ CORS(app, resources={r'/youtube-dl/*': {"origins": "*"}})
 SERVER_HOST =  '0.0.0.0'
 SERVER_PORT = 8080
 
-# TODO : Scheduled deletion of files in downloaded songs (APScheduler)
-
-# TODO : Improve cacheing using redis / memcached
+# Enhancement : Improve cacheing using redis / memcached
 # Uses id of video as key to store details needed to serve file
 video_cache_config = {
     "CACHE_TYPE": "FileSystemCache",  # Flask-Caching related configs
     "CACHE_DIR": "./cache/vid_cache_tmp",
-    "CACHE_DEFAULT_TIMEOUT": 24*60*60 # Cache cleared every 24 hours
+    "CACHE_DEFAULT_TIMEOUT": 10*60 # Cache cleared every 10 min
 }
 
 processing_queue_cache_config = {
     "CACHE_TYPE": "FileSystemCache",  # Flask-Caching related configs
     "CACHE_DIR": "./cache/proc_q_cache_tmp",
-    "CACHE_DEFAULT_TIMEOUT": 60*60 # Cache cleared every hour
+    "CACHE_DEFAULT_TIMEOUT": 10*60 # Cache cleared every 10 min
 }
 
 video_cache = Cache(config=video_cache_config)
@@ -40,6 +41,22 @@ processing_queue_cache = Cache(config=processing_queue_cache_config)
 
 video_cache.init_app(app)
 processing_queue_cache.init_app(app)
+
+
+# Scheduled deletion of files in downloadedsongs folder and
+# clearing video, processing caches
+def clearCache():
+    print("Clearing cache and songs", flush=True)
+    try:
+        shutil.rmtree(os.path.abspath("./downloadedsongs"))
+    except FileNotFoundError:
+        pass
+    video_cache.clear()
+    processing_queue_cache.clear()
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(clearCache, 'interval', hours=6)
+scheduler.start()
 
 def add_thumbnail(file_path,id, artist=None):
     """
