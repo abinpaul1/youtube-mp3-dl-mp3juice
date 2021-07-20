@@ -19,6 +19,8 @@ CORS(app, resources={r'/youtube-dl/*': {"origins": "*"}})
 SERVER_HOST =  '0.0.0.0'
 SERVER_PORT = 8080
 
+# TODO : Scheduled deletion of files in downloaded songs (APScheduler)
+
 # TODO : Improve cacheing using redis / memcached
 # Uses id of video as key to store details needed to serve file
 video_cache_config = {

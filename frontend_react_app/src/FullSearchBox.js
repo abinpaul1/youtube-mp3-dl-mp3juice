@@ -199,7 +199,8 @@ export default class FullSearchBox extends React.PureComponent{
                       backgroundColor: '#0087cf'
                     }}
                     variant="outline-primary">
-                      Please wait...
+                      Please wait
+                      <span style={{marginLeft: "12px"}} class="spinner-border spinner-border-sm" role="status" aria-hidden="true">  </span>
                   </Button>
                 );
             case cardButtonState.ERROR:
