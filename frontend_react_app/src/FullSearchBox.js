@@ -4,7 +4,16 @@ import { Card } from "react-bootstrap";
 import { Button} from "react-bootstrap";
 import logo from './download.png'
 
-import {youtubeSearch, suggest} from "./services/youtube";
+import {youtubeSearch, suggest, triggerVideoConversion, downloadAudioInNewWindow} from "./services/youtube";
+
+const API_PATH = 'api'
+
+const cardButtonState = {
+	IDLE : 0,
+  CONVERT : 1,
+  ERROR : 2,
+  DOWNLOAD: 3
+}
 
 const Container = styled("div")`
   position: relative;
@@ -96,6 +105,7 @@ export default class FullSearchBox extends React.PureComponent{
         suggestions: null,
         queryString : "",
         searchResult : [],
+        cardButtonStates : {}, // Value must default to IDLE if key is not present
       //   searchResult : [
       //     {duration: "5:50", id: "x6kkDnL8-qw", thumbnail: "https://i.ytimg.com/vi/x6kkDnL8-qw/hq720.jpg?sqp=-…AFwAcABBg==&rs=AOn4CLB5TbXss5dfDZvPFq4SjP8LgQ8lYg", title: "Mussanje Maatu - Yenagali", view_count: "1.3M views"},
       //     {duration: "29:40", id: "8O26ZMp0PUo", thumbnail: "https://i.ytimg.com/vi/8O26ZMp0PUo/hq720.jpg?sqp=-…AFwAcABBg==&rs=AOn4CLBSxxs0pS_shixZFkE32-W6a22xeQ", title: "Mussanje Maatu I Kannada Movie Video Jukebox I Sudeep, Ramya", view_count: "5.5M views"}
@@ -131,14 +141,12 @@ export default class FullSearchBox extends React.PureComponent{
         )
     }
 
-
     renderCards() {
         return this.state.searchResult.map((result) => {
+            // Render each card's button based on state of its video status
             const { title, id, thumbnail, duration, view_count } = result;
-            const encodedYoutubeId = encodeURIComponent(id);
-            const download_url = `api/youtube-dl/download?ybid=${encodedYoutubeId}`
             return (
-              <CardsContainer>
+              <CardsContainer key={id}>
                 <Card 
                   style={{ 
                     width: '300px',
@@ -152,20 +160,79 @@ export default class FullSearchBox extends React.PureComponent{
                     <img width="300px" src={thumbnail} alt={title} />
                     <h6>{title}</h6>
                     <p>{duration} mins | {view_count}</p>
-                    <Button
-                      style={{
-                        color: 'white',
-                        fontWeight: 'bold',
-                        border: '2px solid white',
-                        backgroundColor: '#0087cf'
-                      }}
-                      href={download_url}
-                      target="_blank"
-                      variant="outline-primary">Download</Button>
+                    {this.renderButtonBasedOnCard(id)}
                 </Card>
               </CardsContainer>
             );
         });
+    }
+
+    renderButtonBasedOnCard(id) {
+        // Returns button based on cards current state
+
+        // CardButtonState defaults to IDLE if key is not present
+        var currentCardButtonState = this.state.cardButtonStates[id] || cardButtonState.IDLE;
+
+        switch (currentCardButtonState) {
+            case cardButtonState.IDLE:
+                return (
+                  <Button
+                    style={{
+                      color: 'white',
+                      fontWeight: 'bold',
+                      border: '2px solid white',
+                      backgroundColor: '#0087cf'
+                    }}
+                    onClick={this.onCovertClick.bind(this, id)}
+                    variant="outline-primary">
+                      Convert
+                  </Button>
+                );
+            case cardButtonState.CONVERT:
+                // TODO : Add waiting gif
+                return (
+                  <Button
+                    style={{
+                      color: 'white',
+                      fontWeight: 'bold',
+                      border: '2px solid white',
+                      backgroundColor: '#0087cf'
+                    }}
+                    variant="outline-primary">
+                      Please wait...
+                  </Button>
+                );
+            case cardButtonState.ERROR:
+                return (
+                  <Button
+                    style={{
+                      color: 'white',
+                      fontWeight: 'bold',
+                      border: '2px solid white',
+                      backgroundColor: '#cc0000'
+                    }}
+                    variant="outline-primary">
+                      Convert Error
+                  </Button>
+                );
+            case cardButtonState.DOWNLOAD:
+              const encodedYoutubeId = encodeURIComponent(id);
+              const download_url = `${API_PATH}/youtube-dl/download?ybid=${encodedYoutubeId}`
+              return (
+                <Button
+                  style={{
+                    color: 'white',
+                    fontWeight: 'bold',
+                    border: '2px solid white',
+                    backgroundColor: '#4BB543'
+                  }}
+                  href={download_url}
+                  target="_blank"
+                  variant="outline-primary">Download</Button>
+              );
+            default:
+              return null;
+        }
     }
 
     onTypeSuggest = async (
@@ -193,6 +260,38 @@ export default class FullSearchBox extends React.PureComponent{
         queryString : queryString,
         suggestions : null,
         searchResult : searchResults,
+        cardButtonStates : {} // Cleared to hold new card states
       });
+    }
+
+    onCovertClick = async (youtubeId) => {
+      // Should only be called when not undergoing conversion already
+      triggerVideoConversion(youtubeId).then(success => {
+        if (success) {
+          // Change to a ready message on button
+          var currentCardButtonStates = {...this.state.cardButtonStates};
+          currentCardButtonStates[youtubeId] = cardButtonState.DOWNLOAD;
+          this.setState({cardButtonStates: currentCardButtonStates});
+          // Trigger automatic download
+          downloadAudioInNewWindow(youtubeId);
+        }
+        else{
+          // Show failed and transition back to IDLE state after 2 seconds
+          var currentCardButtonStates = {...this.state.cardButtonStates};
+          currentCardButtonStates[youtubeId] = cardButtonState.ERROR;
+          this.setState({cardButtonStates: currentCardButtonStates});
+          // Delay before reverting to IDLE state
+          setTimeout(() => {
+            currentCardButtonStates = {...this.state.cardButtonStates};
+            currentCardButtonStates[youtubeId] = cardButtonState.IDLE;
+            this.setState({cardButtonStates: currentCardButtonStates});
+          }, 2500);
+        }
+      });
+      // Set this cards button to waiting state
+      // Card is uniquely identified by id, that was passed to this function
+      var currentCardButtonStates = {...this.state.cardButtonStates}; //copy is necessary to mutate state
+      currentCardButtonStates[youtubeId] = cardButtonState.CONVERT;
+      this.setState({cardButtonStates: currentCardButtonStates});
     }
 }
