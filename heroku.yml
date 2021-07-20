@@ -1,0 +1,3 @@
+build:
+  docker:
+    backend: backend_flask_server/Dockerfile.prod

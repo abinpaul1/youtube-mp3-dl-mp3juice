@@ -16,6 +16,6 @@ EXPOSE 8080
 COPY . .
 
 CMD ["/bin/bash"]
-ENTRYPOINT gunicorn --chdir /usr/src/app app:app -t 0 -w 10 --threads 10 -b 0.0.0.0:8080 --preload --error-logfile gunicorn.error.log
+ENTRYPOINT gunicorn --chdir /usr/src/app app:app -t 0 -w 4 --threads 4 -b 0.0.0.0:$PORT --preload --error-logfile gunicorn.error.log
 # gunicorn preload is necessary to ensure only one APScheduler background
 # process is running. Preloads loads app code before forking workers
