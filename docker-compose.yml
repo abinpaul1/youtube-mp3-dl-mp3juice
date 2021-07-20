@@ -8,8 +8,8 @@ services:
     ports:
         - 3000:80
     volumes: 
-        - ./frontend_react_app:/usr/src/app
         - node_modules:/usr/src/app/node_modules
+        # - ./frontend_react_app:/usr/src/app
     depends_on:
       - backend
     
@@ -19,15 +19,11 @@ services:
     container_name: backend
     build: 
         context: ./backend_flask_server
-        dockerfile: Dockerfile.prod
+        dockerfile: Dockerfile.prod 
+    # volumes:
+    #   - ./backend_flask_server:/usr/src/app
     ports:
       - 8080:8080
-    volumes:
-      - ./backend_flask_server:/usr/src/app
-    environment:
-      - FLASK_ENV=development
-      - FLASK_APP=app.py
-      - FLASK_DEBUG=1
 
 volumes:
   node_modules:  

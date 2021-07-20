@@ -1,6 +1,6 @@
 import jsonp from 'simple-jsonp-promise'
 
-const API_PATH = 'api'
+const API_PATH = process.env.REACT_APP_API_PATH;
 
 export const suggest = (term) => {
     const url = 'https://clients1.google.com/complete/search'

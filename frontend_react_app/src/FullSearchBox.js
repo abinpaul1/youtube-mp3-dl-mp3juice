@@ -6,7 +6,7 @@ import logo from './download.png'
 
 import {youtubeSearch, suggest, triggerVideoConversion, downloadAudioInNewWindow} from "./services/youtube";
 
-const API_PATH = 'api'
+const API_PATH = process.env.REACT_APP_API_PATH;
 
 const cardButtonState = {
 	IDLE : 0,
@@ -189,7 +189,6 @@ export default class FullSearchBox extends React.PureComponent{
                   </Button>
                 );
             case cardButtonState.CONVERT:
-                // TODO : Add waiting gif
                 return (
                   <Button
                     style={{
