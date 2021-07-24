@@ -7,7 +7,7 @@
 - Download audio from youtube videos as mp3
 
 ## Demo
-- <a href="audio.kenobi.win">audio.kenobi.win</a>
+- <a href="https://audio.kenobi.win">audio.kenobi.win</a>
 
 
 ### Quick Deployment
